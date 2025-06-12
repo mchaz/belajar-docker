@@ -1,0 +1,54 @@
+# tutorial_services_docker/docker-compose.yml
+version: '3.8'
+
+services:
+  user_service:
+    build:
+      context: . # <-- Ubah: Konteks adalah direktori root proyek
+      dockerfile: user_service/Dockerfile # <-- Tambah: Tentukan path Dockerfile
+    container_name: tutorial_user_service
+    ports:
+      - "5001:5001"
+    volumes:
+      - user_data:/app
+    working_dir: /app
+    stop_signal: SIGINT
+    restart: unless-stopped
+
+  product_service:
+    build:
+      context: . # <-- Ubah: Konteks adalah direktori root proyek
+      dockerfile: product_service/Dockerfile # <-- Tambah: Tentukan path Dockerfile
+    container_name: tutorial_product_service
+    ports:
+      - "5002:5002"
+    volumes:
+      - product_data:/app
+    working_dir: /app
+    stop_signal: SIGINT
+    restart: unless-stopped
+
+  order_service:
+    build:
+      context: . # <-- Ubah: Konteks adalah direktori root proyek
+      dockerfile: order_service/Dockerfile # <-- Tambah: Tentukan path Dockerfile
+    container_name: tutorial_order_service
+    ports:
+      - "5003:5003"
+    volumes:
+      - order_data:/app
+    working_dir: /app
+    environment:
+      USER_PROVIDER_URL: http://user_service:5001
+      PRODUCT_PROVIDER_URL: http://product_service:5002
+      FLASK_DEBUG: "1"
+    depends_on:
+      - user_service
+      - product_service
+    stop_signal: SIGINT
+    restart: unless-stopped
+
+volumes:
+  user_data:
+  product_data:
+  order_data:
